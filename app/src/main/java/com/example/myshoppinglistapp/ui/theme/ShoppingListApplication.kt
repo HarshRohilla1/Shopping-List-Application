@@ -89,7 +89,7 @@ fun ShoppingListAndroid() {
                 {
                     ShoppingListItem(item = item,
                         onclickEditing = {sItems =sItems.map { it.copy(isEditing = it.id == item.id)}},
-                        onClickDelete = {sItems - item}
+                        onClickDelete = {sItems=sItems.toMutableList().also { it.remove(item) }}
                         )
 
 
