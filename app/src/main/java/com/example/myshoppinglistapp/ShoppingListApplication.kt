@@ -1,5 +1,11 @@
-package com.example.myshoppinglistapp.ui.theme
+package com.example.myshoppinglistapp
 
+import android.Manifest
+import android.content.Context
+import android.location.Address
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +23,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,21 +39,63 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.navigation.NavController
+import kotlin.random.Random
 
 data class ShoppingItems(var quantity:Int,
                          var name:String,
                          var id:Int,
-                         var isEditing:Boolean= false
+                         var isEditing:Boolean= false,
+                         var address: String = ""
 )
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingListAndroid() {
+fun ShoppingListAndroid(
+    LocationUtils: LocationUtils,
+    address: String,
+    viewModel: LocationViewModel,
+    navController: NavController,
+    context: Context
+) {
     var sItems by remember { mutableStateOf(listOf<ShoppingItems>()) }
     var showDialog by remember{ mutableStateOf(false) }
     var itemName by remember{ mutableStateOf("")}
     var itemQuantity by remember{ mutableStateOf("")}
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions() ,
+        onResult ={permissions ->
+            if(permissions[Manifest.permission.ACCESS_COARSE_LOCATION]==true
+                && permissions[Manifest.permission.ACCESS_FINE_LOCATION]==true)
+            {
+                LocationUtils.requestLocationUpdates(viewModel =viewModel)
+
+            }
+            else
+            {
+                val rationalRequired= ActivityCompat.shouldShowRequestPermissionRationale(
+                    context as MainActivity,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) || ActivityCompat.shouldShowRequestPermissionRationale(
+                    context ,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                if(rationalRequired)
+                {
+                    Toast.makeText(context, "Location Permission Required", Toast.LENGTH_SHORT).show()
+                }
+                else
+                {
+                    Toast.makeText(context, "Go to Settings to Give Permission", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+        } )
+
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -113,7 +162,7 @@ fun ShoppingListAndroid() {
                                 Button(onClick = {
                                     if(itemName.isNotBlank())
                                     {
-                                        val newItem =ShoppingItems(
+                                        val newItem = ShoppingItems(
                                             name = itemName,
                                             quantity = itemQuantity.toInt(),
                                             id = sItems.size+1
@@ -144,15 +193,36 @@ fun ShoppingListAndroid() {
                         maxLines = 1,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(8.dp),
+                        label = {Text("Item Name")}
                     )
                     OutlinedTextField(value = itemQuantity,
                         onValueChange = {itemQuantity = it},
                         maxLines = 1,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(8.dp),
+                        label = {Text("Item Quantity")}
                     )
+                    
+                    Button(onClick = {
+                        if(LocationUtils.hasLocationPermission(context)){
+                            LocationUtils.requestLocationUpdates(viewModel)
+                            navController.navigate("locationScreen"){
+                                this.launchSingleTop
+                            }
+                        }
+                        else{
+                            requestPermissionLauncher.launch(arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                            ))
+
+                        }
+                    })
+                    {
+                        Text(text = "Address")
+                    }
 
 
                 }
@@ -164,7 +234,7 @@ fun ShoppingListAndroid() {
 }
 
 @Composable
-fun ShoppingListEditor(item: ShoppingItems, onEditComplete:(String,Int)-> Unit)
+fun ShoppingListEditor(item: ShoppingItems, onEditComplete:(String, Int)-> Unit)
 {
     var EditedName by remember { mutableStateOf(item.name) }
     var EditedQuantity by remember { mutableStateOf(item.quantity.toString()) }
@@ -220,9 +290,18 @@ fun ShoppingListItem(
             ),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = item.name, modifier = Modifier.padding(8.dp))
-        Text(text = "Qty:${item.quantity}", modifier = Modifier.padding(8.dp))
-
+        Column(modifier = Modifier
+            .weight(1f)
+            .padding(8.dp)) {
+            Row {
+                Text(text = item.name, modifier = Modifier.padding(8.dp))
+                Text(text = "Qty:${item.quantity}", modifier = Modifier.padding(8.dp))
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Icon(imageVector = Icons.Default.LocationOn, contentDescription = null )
+                Text(text = item.address)
+            }
+        }
         Row(modifier = Modifier.padding(8.dp))
         {
             IconButton(
