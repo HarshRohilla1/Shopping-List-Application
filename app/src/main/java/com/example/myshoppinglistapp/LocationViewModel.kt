@@ -10,6 +10,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.http.Header
 
 class LocationViewModel:ViewModel() {
 
@@ -29,9 +30,7 @@ class LocationViewModel:ViewModel() {
             viewModelScope.launch {
 
                     val result = RetrofitClient.create().getAddressFromCoordinates(
-                        latLng,
-                        "AIzaSyDCvlS76LQ31VyvHEndbVrrOEHDXju_7U4"
-                    )
+                        "com.example.myshoppinglistapp", "DDF1F9AA7F49BC7644A3F08F6D7CBF86B414B583", latLng,"AIzaSyDCvlS76LQ31VyvHEndbVrrOEHDXju_7U4")
                     _address.value=result.results
 
             }

@@ -2,7 +2,6 @@ package com.example.myshoppinglistapp
 
 import android.Manifest
 import android.content.Context
-import android.location.Address
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -79,7 +78,7 @@ fun ShoppingListAndroid(
                     context as MainActivity,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) || ActivityCompat.shouldShowRequestPermissionRationale(
-                    context ,
+                    context as MainActivity ,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
                 if(rationalRequired)
@@ -98,7 +97,8 @@ fun ShoppingListAndroid(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center
     )
     {
         Button(
@@ -129,6 +129,7 @@ fun ShoppingListAndroid(
                             editedItem?.let {
                                 it.name =EditedName
                                 it.quantity = EditedQuntity
+                                it.address = address
 
                             }
                         }
@@ -165,7 +166,8 @@ fun ShoppingListAndroid(
                                         val newItem = ShoppingItems(
                                             name = itemName,
                                             quantity = itemQuantity.toInt(),
-                                            id = sItems.size+1
+                                            id = sItems.size+1,
+                                            address = address
                                         )
                                         showDialog = false
                                         sItems = sItems + newItem
@@ -215,13 +217,13 @@ fun ShoppingListAndroid(
                         else{
                             requestPermissionLauncher.launch(arrayOf(
                                 Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                Manifest.permission.ACCESS_COARSE_LOCATION
                             ))
 
                         }
                     })
                     {
-                        Text(text = "Address")
+                        Text( "Address")
                     }
 
 

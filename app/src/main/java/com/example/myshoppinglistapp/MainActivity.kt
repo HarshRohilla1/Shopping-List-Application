@@ -45,10 +45,10 @@ fun Navigation()
         composable("shoppingListScreen") {
             ShoppingListAndroid(
                 LocationUtils = locationutils,
-                address = viewModel.address.value.firstOrNull()?.formatted_address ?: "No Address",
                 viewModel = viewModel,
                 navController = navController,
-                context = context
+                context = context,
+                address = viewModel.address.value.firstOrNull()?.formatted_address ?: "No Address"
             )
         }
         dialog("locationScreen") {backtrack->

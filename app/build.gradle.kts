@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -50,6 +51,13 @@ android {
 }
 
 dependencies {
+
+    val room = "2.6.0"
+
+    //room
+    implementation("androidx.room:room-runtime:$room")
+    implementation("androidx.room:room-ktx:$room")
+    kapt("androidx.room:room-compiler:$room")
 
     implementation("com.google.maps.android:maps-compose:2.15.0")
     implementation("com.google.android.gms:play-services-location:18.1.0")
