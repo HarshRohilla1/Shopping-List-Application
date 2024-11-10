@@ -6,13 +6,16 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myshoppinglistapp.data.ItemRepository
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.http.Header
 
-class LocationViewModel:ViewModel() {
+class LocationViewModel(/*private val itemrepository: ItemRepository = Graph.itemRepository*/):ViewModel() {
+
+
 
     private val _location = mutableStateOf<LocationData?>(null)
     val location: State<LocationData?> =  _location

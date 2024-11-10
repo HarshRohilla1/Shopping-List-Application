@@ -9,6 +9,6 @@ import androidx.room.RoomDatabase
     version = 1,
     exportSchema = false
 )
-abstract class ItemDatabase {
+abstract class ItemDatabase: RoomDatabase() {
     abstract fun ItemDao():ItemDao
 }
