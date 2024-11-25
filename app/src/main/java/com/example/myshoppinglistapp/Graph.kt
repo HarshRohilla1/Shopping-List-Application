@@ -7,11 +7,13 @@ import com.example.myshoppinglistapp.data.ItemRepository
 object Graph {
     lateinit var database: ItemDatabase
 
+
     val itemRepository by lazy {
         ItemRepository(itemDao = database.ItemDao())
     }
 
+
     fun provide(context: Context){
-        database = Room.databaseBuilder(context, ItemDatabase::class.java, "item_database.db").build()
+        database = Room.databaseBuilder(context, ItemDatabase::class.java, "itemlist.db").build()
     }
 }

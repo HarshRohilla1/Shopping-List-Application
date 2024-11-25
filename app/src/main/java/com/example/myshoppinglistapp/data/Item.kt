@@ -11,5 +11,7 @@ data class Item(
     @ColumnInfo(name = "item-name")
     val name:String ="",
     @ColumnInfo(name = "item-quantity")
-    val quantity:Int = 0
+    val quantity:String ="",
+    @ColumnInfo(name="shop-address")
+    val address:String = ""
 )

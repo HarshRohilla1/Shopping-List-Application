@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MyShoppingListApp</string>
+    <string name="add_item">Add Item</string>
+    <string name="update_item">Update Item</string>
+    <string name="add_address">Add Address</string>
+    <string name="change_address">Change Address</string>
 </resources>

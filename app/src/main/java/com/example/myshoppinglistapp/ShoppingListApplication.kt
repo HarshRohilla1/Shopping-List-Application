@@ -49,12 +49,6 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import kotlin.random.Random
 
-data class ShoppingItems(var quantity:Int,
-                         var name:String,
-                         var id:Int,
-                         var isEditing:Boolean= false,
-                         var address: String = ""
-)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListAndroid(
@@ -64,287 +58,33 @@ fun ShoppingListAndroid(
     navController: NavController,
     context: Context
 ) {
-    var sItems by remember { mutableStateOf(listOf<ShoppingItems>()) }
-    var showDialog by remember{ mutableStateOf(false) }
-    var itemName by remember{ mutableStateOf("")}
-    var itemQuantity by remember{ mutableStateOf("")}
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions() ,
-        onResult ={permissions ->
-            if(permissions[Manifest.permission.ACCESS_COARSE_LOCATION]==true
-                && permissions[Manifest.permission.ACCESS_FINE_LOCATION]==true)
-            {
-                LocationUtils.requestLocationUpdates(viewModel =viewModel)
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            if (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                && permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            ) {
+                LocationUtils.requestLocationUpdates(viewModel = viewModel)
 
-            }
-            else
-            {
-                val rationalRequired= ActivityCompat.shouldShowRequestPermissionRationale(
+            } else {
+                val rationalRequired = ActivityCompat.shouldShowRequestPermissionRationale(
                     context as MainActivity,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) || ActivityCompat.shouldShowRequestPermissionRationale(
-                    context as MainActivity ,
+                    context as MainActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
-                if(rationalRequired)
-                {
-                    Toast.makeText(context, "Location Permission Required", Toast.LENGTH_SHORT).show()
-                }
-                else
-                {
-                    Toast.makeText(context, "Go to Settings to Give Permission", Toast.LENGTH_SHORT).show()
-                }
-
-            }
-        } )
-
-
-
-    Column(
-        modifier = Modifier.background(colorResource(R.color.card))
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    )
-    {
-        Button(
-            onClick = {showDialog = true},
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(
-                    top = 60.dp
-                ).width(250.dp).height(50.dp),
-            shape = RoundedCornerShape(15.dp),
-            elevation = ButtonDefaults.elevatedButtonElevation(5.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.button),
-                contentColor = Color.White
-            ),
-
-        ) {
-            Text("Add Item")
-
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(sItems) {
-                item->
-                if(item.isEditing)
-                {
-                    ShoppingListEditor(item = item,
-                        onEditComplete = { EditedName,
-                                           EditedQuntity ->
-                            sItems = sItems.map { it.copy(isEditing = false) }
-                            val editedItem = sItems.find { it.id == item.id }
-                            editedItem?.let {
-                                it.name =EditedName
-                                it.quantity = EditedQuntity
-                                it.address = address
-
-                            }
-                        }
-                    )
-                }
-                else
-                {
-                    ShoppingListItem(item = item,
-                        onclickEditing = {sItems =sItems.map { it.copy(isEditing = it.id == item.id)}},
-                        onClickDelete = {sItems=sItems.toMutableList().also { it.remove(item) }}
-                        )
-
-
-            }
-
-            }
-        }
-    }
-    if(showDialog)
-    {
-        AlertDialog(onDismissRequest = { showDialog=false},
-            confirmButton = {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-
-                            )
-                            {
-                                Button(onClick = {
-                                    if(itemName.isNotBlank())
-                                    {
-                                        val newItem = ShoppingItems(
-                                            name = itemName,
-                                            quantity = itemQuantity.toInt(),
-                                            id = sItems.size+1,
-                                            address = address
-                                        )
-                                        showDialog = false
-                                        sItems = sItems + newItem
-                                        itemName = ""
-
-                                    }
-                                })
-                                {
-                                  Text(text = "Add")
-                                }
-                                Button(
-                                    onClick = { showDialog=false} )
-                                {
-                                    Text(text = "Cancel")
-
-                                }
-
-                            }
-            },
-            title = {Text("Add Item")},
-            text = {
-                Column {
-                    OutlinedTextField(value = itemName,
-                        onValueChange = {itemName = it},
-                        maxLines = 1,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        label = {Text("Item Name")}
-                    )
-                    OutlinedTextField(value = itemQuantity,
-                        onValueChange = {itemQuantity = it},
-                        maxLines = 1,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        label = {Text("Item Quantity")}
-                    )
-                    
-                    Button(onClick = {
-                        if(LocationUtils.hasLocationPermission(context)){
-                            LocationUtils.requestLocationUpdates(viewModel)
-                            navController.navigate("locationScreen"){
-                                this.launchSingleTop
-                            }
-                        }
-                        else{
-                            requestPermissionLauncher.launch(arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            ))
-
-                        }
-                    })
-                    {
-                        Text( "Address")
-                    }
-
-
+                if (rationalRequired) {
+                    Toast.makeText(context, "Location Permission Required", Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    Toast.makeText(context, "Go to Settings to Give Permission", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
             }
-
-        )
-    }
+        })
 }
 
-@Composable
-fun ShoppingListEditor(item: ShoppingItems, onEditComplete:(String, Int)-> Unit)
-{
-    var EditedName by remember { mutableStateOf(item.name) }
-    var EditedQuantity by remember { mutableStateOf(item.quantity.toString()) }
-    var isEditing by remember { mutableStateOf(false) }
-
-     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    )
-    {
-        Column {
-            BasicTextField(value = EditedName, onValueChange ={EditedName =it },
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(8.dp),
-                singleLine = true)
-            BasicTextField(value = EditedQuantity, onValueChange ={EditedQuantity =it },
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(8.dp),
-                singleLine = true)
-        }
-        Button(
-            onClick = {
-                isEditing =false
-                onEditComplete(EditedName, EditedQuantity.toIntOrNull() ?: 1)
-            }
-        )
-        {
-            Text(text = "Save")
-        }
-
-    }
-
-}
-
-@Composable
-fun ShoppingListItem(
-    item: ShoppingItems,
-    onclickEditing: ()->Unit,
-    onClickDelete: ()->Unit
-)
-{
-    Card(modifier = Modifier,
-        shape = RoundedCornerShape(0.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 5.dp),
-        colors = CardDefaults.cardColors(
-            colorResource(R.color.card)
-        )
-
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                ,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp)
-            ) {
-                Row {
-                    Text(text = item.name, modifier = Modifier.padding(8.dp), color = Color.White)
-                    Text(text = "Qty:${item.quantity}", modifier = Modifier.padding(8.dp), color = Color.White)
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Icon(imageVector = Icons.Default.LocationOn, contentDescription = null,tint = Color.White)
-                    Text(text = item.address, color = Color.White)
-                }
-            }
-            Row(modifier = Modifier.padding(8.dp))
-            {
-                IconButton(
-                    onClick = onclickEditing
-                ) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = null,tint = Color.White)
-
-                }
-                IconButton(
-                    onClick = onClickDelete
-                ) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = null,tint = Color.White)
-
-                }
-
-            }
-
-        }
-    }
-
-}
 

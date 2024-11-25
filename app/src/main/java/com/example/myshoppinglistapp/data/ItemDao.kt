@@ -17,10 +17,10 @@ abstract class ItemDao {
     abstract fun getAllItems(): Flow<List<Item>>
 
     @Update
-    abstract suspend fun updateAItem(wishEntity:Item)
+    abstract suspend fun updateAItem(ItemEntity:Item)
 
     @Delete
-    abstract suspend fun deleteAItem(wishEntity: Item)
+    abstract suspend fun deleteAItem(ItemEntity: Item)
 
     @Query("select * from `ITEM_TABLE` where id=:id")
     abstract fun getAItemById(id:Long):Flow<Item>
